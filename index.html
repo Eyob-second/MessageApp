@@ -1,51 +1,430 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hotspot Messenger</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Hotspot Messenger | Modern Chat</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; margin: 0; }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; list-style-type: none; }
-        #form { display: flex; padding: 10px; border-top: 1px solid #ccc; }
-        #input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(145deg, #121826 0%, #0f1419 100%);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            color: #eef2ff;
+        }
+
+        /* Custom scrollbar for modern look */
+        #messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #messages::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 10px;
+        }
+
+        #messages::-webkit-scrollbar-thumb {
+            background: #4f5b77;
+            border-radius: 10px;
+        }
+
+        #messages::-webkit-scrollbar-thumb:hover {
+            background: #6b7c9e;
+        }
+
+        /* Chat container header (implicit elegance) */
+        .chat-header {
+            background: rgba(18, 24, 38, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(71, 85, 105, 0.5);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 6px #10b981;
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; transform: scale(0.95);}
+            100% { opacity: 1; transform: scale(1.2);}
+        }
+
+        .chat-header h1 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            background: linear-gradient(135deg, #e9f0ff, #a5c9ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .badge {
+            background: #2d3a4e;
+            padding: 4px 10px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #bfd9ff;
+            margin-left: 8px;
+        }
+
+        /* Messages area — modern bubbles */
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 20px;
+            list-style-type: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: radial-gradient(circle at 10% 20%, rgba(20, 28, 44, 0.4), rgba(12, 16, 26, 0.6));
+        }
+
+        /* Individual message item */
+        #messages li {
+            max-width: 80%;
+            width: fit-content;
+            padding: 10px 18px;
+            border-radius: 26px;
+            font-size: 0.95rem;
+            line-height: 1.45;
+            word-wrap: break-word;
+            background: #1f2a3e;
+            color: #f1f5f9;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+            animation: fadeSlideUp 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border: 1px solid rgba(71, 85, 105, 0.4);
+            backdrop-filter: blur(2px);
+        }
+
+        /* Simulating "user" vs "other" — since it's hotspot messenger, we add a self visual twist */
+        /* Actually to make it feel like both sides (but original is same style) we'll add slight alternate alignment */
+        /* Using nth-child(even) to mimic different senders for liveliness */
+        #messages li:nth-child(odd) {
+            background: linear-gradient(115deg, #2d3b54, #232e44);
+            align-self: flex-start;
+            border-bottom-left-radius: 8px;
+        }
+
+        #messages li:nth-child(even) {
+            background: linear-gradient(125deg, #2b3b6e, #1e2a48);
+            align-self: flex-end;
+            border-bottom-right-radius: 8px;
+            border: 1px solid rgba(79, 131, 199, 0.5);
+            box-shadow: 0 4px 10px rgba(0, 80, 255, 0.1);
+        }
+
+        /* Timestamp effect (using pseudo-element for modern touch) */
+        #messages li::after {
+            content: "● just now";
+            font-size: 0.6rem;
+            opacity: 0.6;
+            display: block;
+            margin-top: 5px;
+            font-weight: 400;
+            letter-spacing: 0.2px;
+            color: #9eb0cf;
+        }
+
+        /* Slight variation for even messages time style */
+        #messages li:nth-child(even)::after {
+            text-align: right;
+        }
+
+        /* Animation */
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Form area — sleek glassmorphism */
+        #form {
+            display: flex;
+            padding: 16px 20px;
+            background: rgba(15, 20, 30, 0.85);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(71, 85, 105, 0.5);
+            gap: 12px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        #input {
+            flex: 1;
+            padding: 14px 18px;
+            background: #11161f;
+            border: 1px solid #2d3a4e;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            color: #edf2ff;
+            font-family: inherit;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        #input:focus {
+            border-color: #4f83c7;
+            box-shadow: 0 0 0 3px rgba(79, 131, 199, 0.2);
+            background: #0e131f;
+        }
+
+        #input::placeholder {
+            color: #6c7e9e;
+            font-weight: 400;
+        }
+
+        button {
+            background: linear-gradient(105deg, #2c5f9a, #1f4891);
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        button:hover {
+            background: linear-gradient(105deg, #3a72b0, #2858a3);
+            transform: scale(0.98);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: scale(0.96);
+        }
+
+        /* Empty state style */
+        .empty-chat-placeholder {
+            text-align: center;
+            margin-top: 30px;
+            color: #60708c;
+            font-size: 0.9rem;
+            font-weight: 400;
+            background: rgba(0,0,0,0.2);
+            width: fit-content;
+            padding: 12px 22px;
+            border-radius: 60px;
+            backdrop-filter: blur(4px);
+            align-self: center;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 560px) {
+            #messages li {
+                max-width: 90%;
+                font-size: 0.9rem;
+                padding: 8px 14px;
+            }
+            button {
+                padding: 10px 18px;
+            }
+            .chat-header h1 {
+                font-size: 1.1rem;
+            }
+            #form {
+                padding: 12px 16px;
+            }
+        }
+
+        /* tiny system indicator */
+        .connection-status {
+            font-size: 0.7rem;
+            background: #1e2a3a;
+            border-radius: 30px;
+            padding: 4px 12px;
+            color: #8ba5cf;
+        }
     </style>
+    <!-- Google Fonts + Inter for crisp modern UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <ul id="messages"></ul>
+    <!-- Custom header for enhanced hotspot messenger identity -->
+    <div class="chat-header">
+        <div class="status-dot"></div>
+        <h1>🔥 Hotspot Messenger <span class="badge">live p2p</span></h1>
+        <div style="flex:1"></div>
+        <div class="connection-status" id="connStatus">● connected</div>
+    </div>
+
+    <ul id="messages">
+        <!-- initial friendly message to show design -->
+        <li style="background: linear-gradient(115deg, #27344c, #1f293f); align-self: center; text-align: center; font-size:0.85rem; opacity:0.9; border-radius: 30px;" class="system-hint">✨ Welcome! Messages appear in realtime ✨</li>
+    </ul>
+    
     <form id="form">
-        <input id="input" autocomplete="off" placeholder="Type a message..." /><button>Send</button>
+        <input id="input" autocomplete="off" placeholder="Type a message...  ✍️" />
+        <button type="submit">📡 Send</button>
     </form>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('Service Worker registered!', reg))
-      .catch(err => console.error('Registration failed:', err));
-  });
-}
+        // Service Worker registration (preserved from original)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered!', reg))
+                    .catch(err => console.error('Registration failed:', err));
+            });
+        }
 
         const socket = io();
         const form = document.getElementById('form');
         const input = document.getElementById('input');
         const messages = document.getElementById('messages');
+        const connStatusSpan = document.getElementById('connStatus');
 
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            if (input.value) {
-                socket.emit('chat message', input.value);
-                input.value = '';
+        // --- Socket connection feedback (polish)
+        socket.on('connect', () => {
+            console.log('Socket connected');
+            if (connStatusSpan) {
+                connStatusSpan.innerHTML = '● connected';
+                connStatusSpan.style.color = '#7ee0b0';
+            }
+            // Remove placeholder system message after first real connection? keep but we can optionally remove welcome later
+            const welcomeMsg = document.querySelector('.system-hint');
+            if (welcomeMsg && messages.children.length === 1) {
+                // keep it for cozy intro, but optional: we could leave it - no harm.
             }
         });
 
-        socket.on('chat message', (msg) => {
+        socket.on('disconnect', () => {
+            if (connStatusSpan) {
+                connStatusSpan.innerHTML = '⚠️ reconnecting...';
+                connStatusSpan.style.color = '#f5a97f';
+            }
+        });
+
+        socket.on('connect_error', () => {
+            if (connStatusSpan) {
+                connStatusSpan.innerHTML = '⚠️ offline mode';
+                connStatusSpan.style.color = '#f28b82';
+            }
+        });
+
+        // Helper to add a new message with rich style + optional timestamp (already using pseudo, but we keep dynamic)
+        function addMessageToChat(msgText) {
             const item = document.createElement('li');
-            item.textContent = msg;
+            item.textContent = msgText;
+            // custom data attribute to avoid duplicate pseudo if needed but style already defines ::after.
+            // to prevent double timestamps for system message? system hint already existed and we keep it.
+            // The pseudo element will show "● just now" for each new message - modern look.
             messages.appendChild(item);
-            window.scrollTo(0, document.body.scrollHeight);
+            // auto-scroll smoothly
+            item.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+
+        // Remove the initial system placeholder if user interacts or first message? optional: make it vanish after first sent message.
+        let initialSystemMsgRemoved = false;
+        function removeWelcomeHintIfNeeded() {
+            if (!initialSystemMsgRemoved) {
+                const hint = document.querySelector('.system-hint');
+                if (hint && messages.children.length > 1) {
+                    hint.remove();
+                    initialSystemMsgRemoved = true;
+                } else if (hint && messages.children.length === 1 && document.querySelectorAll('li:not(.system-hint)').length > 0) {
+                    hint.remove();
+                    initialSystemMsgRemoved = true;
+                }
+            }
+        }
+
+        // Emit message on form submit
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (input.value.trim()) {
+                const messageToSend = input.value.trim();
+                socket.emit('chat message', messageToSend);
+                // Optimistic update: We'll also show own message immediately for better UX (though server echoes)
+                // but to avoid duplication we rely on server echo. However standard pattern: server will broadcast to all including sender.
+                // BUT to avoid double message: we wait for socket callback. However due to low latency both works.
+                // Original design uses server echo. So we don't add locally to avoid double. but for super responsive feeling,
+                // we could add local temp, but original code only adds on server 'chat message' event, consistent.
+                // keep original behavior: just clear input.
+                input.value = '';
+                // remove welcome hint after first send interaction (nice detail)
+                removeWelcomeHintIfNeeded();
+            } else {
+                // subtle micro interaction: shake effect? not needed but placeholder hint
+                input.style.borderColor = '#f87171';
+                setTimeout(() => { input.style.borderColor = '#2d3a4e'; }, 800);
+            }
+        });
+
+        // Receive messages from server (broadcast)
+        socket.on('chat message', (msg) => {
+            // edge: if message is object? we handle string as original contract.
+            if (typeof msg === 'string') {
+                addMessageToChat(msg);
+            } else if (msg && msg.text) {
+                // fallback for potential extended payload
+                addMessageToChat(msg.text);
+            } else {
+                addMessageToChat(String(msg));
+            }
+            removeWelcomeHintIfNeeded();
+        });
+
+        // Also listen for any existing messages on connection? not needed, but we ensure scroll visibility 
+        // after load adjust for existing messages if any (just for completeness)
+        window.addEventListener('load', () => {
+            // if there are already messages (like previous session)
+            if (messages.children.length > 0) {
+                messages.lastElementChild?.scrollIntoView({ behavior: 'auto', block: 'end' });
+            }
+            // optional: focus input on load
+            input.focus();
+        });
+
+        // Extra ux: press enter works by default; already done. but we add ctrl+enter? not needed.
+        // dynamic style for connection retry indicator
+        let reconnectTimer;
+        socket.io.on("reconnect_attempt", () => {
+            if (connStatusSpan) {
+                connStatusSpan.innerHTML = '⟳ reconnecting...';
+                connStatusSpan.style.color = '#facc15';
+            }
+        });
+        socket.io.on("reconnect", () => {
+            if (connStatusSpan) {
+                connStatusSpan.innerHTML = '● connected';
+                connStatusSpan.style.color = '#7ee0b0';
+            }
         });
     </script>
 </body>
